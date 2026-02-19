@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Miele Snake - Premium Gaming Experience</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #f8f8f8 0%, #e8e8e8 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 20px;
+        }
+        
+        /* Miele Header */
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .miele-logo {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #B92D29;
+            letter-spacing: 2px;
+            margin-bottom: 5px;
+        }
+        
+        .miele-tagline {
+            font-size: 0.85rem;
+            color: #666;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+        }
+        
+        .game-title {
+            font-size: 1.2rem;
+            color: #333;
+            margin-top: 15px;
+            font-weight: 300;
+        }
+        
+        /* Game Container */
+        .game-container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            border: 1px solid #e0e0e0;
+        }
+        
+        /* Score Board */
+        .score-board {
+            display: flex;
+            gap: 40px;
+            margin-bottom: 15px;
+            padding: 12px 30px;
+            background: #f5f5f5;
+            border-radius: 30px;
+        }
+        
+        .score-item {
+            text-align: center;
+        }
+        
+        .score-label {
+            font-size: 0.7rem;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .score-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #B92D29;
+        }
+        
+        /* Canvas */
+        canvas {
+            border: 3px solid #B92D29;
+            border-radius: 8px;
+            background: #fafafa;
+            display: block;
+        }
+        
+        /* Controls Info */
+        .controls {
+            margin-top: 15px;
+            text-align: center;
+            color: #666;
+            font-size: 0.85rem;
+        }
+        
+        .controls-key {
+            display: inline-block;
+            background: #f0f0f0;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-weight: 600;
+            color: #333;
+            margin: 0 2px;
+            border: 1px solid #ddd;
+        }
+        
+        /* Buttons */
+        .btn-container {
+            margin-top: 15px;
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 30px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+        
+        .btn-primary {
+            background: #B92D29;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #9a2522;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(185, 45, 41, 0.4);
+        }
+        
+        .btn-secondary {
+            background: transparent;
+            color: #333;
+            border: 2px solid #ddd;
+        }
+        
+        .btn-secondary:hover {
+            border-color: #B92D29;
+            color: #B92D29;
+        }
+        
+        /* Game Over Overlay */
+        .overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            background: rgba(255,255,255,0.95);
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+            display: none;
+            z-index: 10;
+            border: 2px solid #B92D29;
+        }
+        
+        .overlay.show {
+            display: block;
+        }
+        
+        .overlay h2 {
+            color: #B92D29;
+            margin-bottom: 10px;
+            font-size: 2rem;
+        }
+        
+        .overlay p {
+            color: #666;
+            margin-bottom: 20px;
+        }
+        
+        .canvas-wrapper {
+            position: relative;
+        }
+        
+        /* Miele Red Accent Bar */
+        .accent-bar {
+            width: 100%;
+            height: 4px;
+            background: #B92D29;
+            border-radius: 2px;
+            margin-top: 20px;
+        }
+        
+        /* Premium badge */
+        .premium-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background: linear-gradient(135deg, #c0c0c0, #e8e8e8, #c0c0c0);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            color: #333;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+        
+        /* Appliance icons hint */
+        .appliance-hint {
+            font-size: 0.75rem;
+            color: #999;
+            margin-top: 10px;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="miele-logo">MIELE</div>
+        <div class="miele-tagline">Immer Besser</div>
+        <div class="game-title">Premium Snake Experience</div>
+    </div>
+    
+    <div class="game-container">
+        <div class="score-board">
+            <div class="score-item">
+                <div class="score-label">Score</div>
+                <div class="score-value" id="score">0</div>
+            </div>
+            <div class="score-item">
+                <div class="score-label">High Score</div>
+                <div class="score-value" id="highScore">0</div>
+            </div>
+            <div class="score-item">
+                <div class="score-label">Level</div>
+                <div class="score-value" id="level">1</div>
+            </div>
+        </div>
+        
+        <div class="canvas-wrapper">
+            <canvas id="gameCanvas" width="400" height="400"></canvas>
+            <div class="overlay" id="gameOverOverlay">
+                <h2>Game Over</h2>
+                <p>Final Score: <span id="finalScore">0</span></p>
+                <button class="btn btn-primary" onclick="startGame()">Play Again</button>
+            </div>
+        </div>
+        
+        <div class="controls">
+            Use <span class="controls-key">↑</span> <span class="controls-key">↓</span> <span class="controls-key">←</span> <span class="controls-key">→</span> or <span class="controls-key">W</span> <span class="controls-key">A</span> <span class="controls-key">S</span> <span class="controls-key">D</span> to move
+        </div>
+        
+        <div class="btn-container">
+            <button class="btn btn-primary" onclick="startGame()">New Game</button>
+            <button class="btn btn-secondary" onclick="pauseGame()">Pause</button>
+        </div>
+        
+        <div class="premium-badge">★ Premium Quality</div>
+        <div class="appliance-hint">Collect Miele pearls • Avoid collisions • Experience excellence</div>
+        
+        <div class="accent-bar"></div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const scoreElement = document.getElementById('score');
+        const highScoreElement = document.getElementById('highScore');
+        const levelElement = document.getElementById('level');
+        const gameOverOverlay = document.getElementById('gameOverOverlay');
+        const finalScoreElement = document.getElementById('finalScore');
+        
+        // Game variables
+        const gridSize = 20;
+        const tileCount = canvas.width / gridSize;
+        
+        let snake = [];
+        let food = {};
+        let direction = { x: 0, y: 0 };
+        let nextDirection = { x: 0, y: 0 };
+        let score = 0;
+        let highScore = localStorage.getItem('mieleSnakeHighScore') || 0;
+        let level = 1;
+        let gameLoop = null;
+        let gameSpeed = 150;
+        let isGameRunning = false;
+        let isPaused = false;
+        
+        // Colors - Miele Theme
+        const colors = {
+            mieleRed: '#B92D29',
+            mieleRedLight: '#D64541',
+            mieleRedDark: '#8B2220',
+            pearl: '#F5F5F5',
+            pearlHighlight: '#FFFFFF',
+            pearlShadow: '#D0D0D0',
+            grid: '#E8E8E8',
+            background: '#FAFAFA'
+        };
+        
+        highScoreElement.textContent = highScore;
+        
+        // Initialize game
+        function initGame() {
+            snake = [
+                { x: 10, y: 10 },
+                { x: 9, y: 10 },
+                { x: 8, y: 10 }
+            ];
+            direction = { x: 1, y: 0 };
+            nextDirection = { x: 1, y: 0 };
+            score = 0;
+            level = 1;
+            gameSpeed = 150;
+            scoreElement.textContent = score;
+            levelElement.textContent = level;
+            placeFood();
+        }
+        
+        // Place food randomly
+        function placeFood() {
+            do {
+                food = {
+                    x: Math.floor(Math.random() * tileCount),
+                    y: Math.floor(Math.random() * tileCount)
+                };
+            } while (snake.some(segment => segment.x === food.x && segment.y === food.y));
+        }
+        
+        // Draw rounded rectangle
+        function drawRoundedRect(x, y, width, height, radius, color) {
+            ctx.fillStyle = color;
+            ctx.beginPath();
+            ctx.moveTo(x + radius, y);
+            ctx.lineTo(x + width - radius, y);
+            ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+            ctx.lineTo(x + width, y + height - radius);
+            ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+            ctx.lineTo(x + radius, y + height);
+            ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+            ctx.lineTo(x, y + radius);
+            ctx.quadraticCurveTo(x, y, x + radius, y);
+            ctx.closePath();
+            ctx.fill();
+        }
+        
+        // Draw snake segment with Miele styling
+        function drawSnakeSegment(segment, index, total) {
+            const x = segment.x * gridSize;
+            const y = segment.y * gridSize;
+            const size = gridSize - 2;
+            
+            if (index === 0) {
+                // Head - premium Miele red with shine effect
+                drawRoundedRect(x, y, size, size, 6, colors.mieleRed);
+                
+                // Shine effect
+                ctx.fillStyle = 'rgba(255,255,255,0.3)';
+                ctx.beginPath();
+                ctx.ellipse(x + size/3, y + size/3, size/4, size/6, -0.5, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Eyes
+                ctx.fillStyle = 'white';
+                ctx.beginPath();
+                ctx.arc(x + size*0.3, y + size*0.35, 3, 0, Math.PI * 2);
+                ctx.arc(x + size*0.7, y + size*0.35, 3, 0, Math.PI * 2);
+                ctx.fill();
+                
+                ctx.fillStyle = 'black';
+                ctx.beginPath();
+                ctx.arc(x + size*0.3, y + size*0.35, 1.5, 0, Math.PI * 2);
+                ctx.arc(x + size*0.7, y + size*0.35, 1.5, 0, Math.PI * 2);
+                ctx.fill();
+            } else {
+                // Body segments with gradient effect
+                const gradientIntensity = 1 - (index / total) * 0.4;
+                const segmentColor = index % 2 === 0 ? colors.mieleRed : colors.mieleRedLight;
+                drawRoundedRect(x, y, size, size, 4, segmentColor);
+                
+                // Subtle shine
+                ctx.fillStyle = `rgba(255,255,255,${0.2 * gradientIntensity})`;
+                ctx.beginPath();
+                ctx.ellipse(x + size/3, y + size/3, size/5, size/8, -0.5, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+        
+        // Draw food - Miele "pearl" styling
+        function drawFood() {
+            const x = food.x * gridSize + gridSize/2;
+            const y = food.y * gridSize + gridSize/2;
+            const radius = gridSize/2 - 3;
+            
+            // Pearl shadow
+            ctx.fillStyle = colors.pearlShadow;
+            ctx.beginPath();
+            ctx.arc(x + 2, y + 2, radius, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Pearl body
+            const gradient = ctx.createRadialGradient(x - 3, y - 3, 0, x, y, radius);
+            gradient.addColorStop(0, colors.pearlHighlight);
+            gradient.addColorStop(0.5, colors.pearl);
+            gradient.addColorStop(1, colors.pearlShadow);
+            
+            ctx.fillStyle = gradient;
+            ctx.beginPath();
+            ctx.arc(x, y, radius, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Miele "M" logo hint
+            ctx.strokeStyle = colors.mieleRed;
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.moveTo(x - 4, y + 3);
+            ctx.lineTo(x - 2, y - 2);
+            ctx.lineTo(x, y + 1);
+            ctx.lineTo(x + 2, y - 2);
+            ctx.lineTo(x + 4, y + 3);
+            ctx.stroke();
+        }
+        
+        // Draw grid
+        function drawGrid() {
+            ctx.strokeStyle = colors.grid;
+            ctx.lineWidth = 0.5;
+            
+            for (let i = 0; i <= tileCount; i++) {
+                ctx.beginPath();
+                ctx.moveTo(i * gridSize, 0);
+                ctx.lineTo(i * gridSize, canvas.height);
+                ctx.stroke();
+                
+                ctx.beginPath();
+                ctx.moveTo(0, i * gridSize);
+                ctx.lineTo(canvas.width, i * gridSize);
+                ctx.stroke();
+            }
+        }
+        
+        // Main draw function
+        function draw() {
+            // Clear canvas
+            ctx.fillStyle = colors.background;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            drawGrid();
+            drawFood();
+            
+            // Draw snake
+            snake.forEach((segment, index) => {
+                drawSnakeSegment(segment, index, snake.length);
+            });
+        }
+        
+        // Update game state
+        function update() {
+            if (isPaused) return;
+            
+            direction = nextDirection;
+            
+            const head = { x: snake[0].x + direction.x, y: snake[0].y + direction.y };
+            
+            // Check wall collision
+            if (head.x < 0 || head.x >= tileCount || head.y < 0 || head.y >= tileCount) {
+                gameOver();
+                return;
+            }
+            
+            // Check self collision
+            if (snake.some(segment => segment.x === head.x && segment.y === head.y)) {
+                gameOver();
+                return;
+            }
+            
+            snake.unshift(head);
+            
+            // Check food collision
+            if (head.x === food.x && head.y === food.y) {
+                score += 10 * level;
+                scoreElement.textContent = score;
+                
+                // Level up every 50 points
+                if (score > 0 && score % 50 === 0) {
+                    level++;
+                    levelElement.textContent = level;
+                    gameSpeed = Math.max(50, gameSpeed - 15);
+                    clearInterval(gameLoop);
+                    gameLoop = setInterval(gameStep, gameSpeed);
+                }
+                
+                placeFood();
+            } else {
+                snake.pop();
+            }
+        }
+        
+        // Game step
+        function gameStep() {
+            update();
+            draw();
+        }
+        
+        // Start game
+        function startGame() {
+            gameOverOverlay.classList.remove('show');
+            isGameRunning = true;
+            isPaused = false;
+            
+            if (gameLoop) clearInterval(gameLoop);
+            
+            initGame();
+            draw();
+            gameLoop = setInterval(gameStep, gameSpeed);
+        }
+        
+        // Pause game
+        function pauseGame() {
+            if (!isGameRunning) return;
+            isPaused = !isPaused;
+            event.target.textContent = isPaused ? 'Resume' : 'Pause';
+        }
+        
+        // Game over
+        function gameOver() {
+            isGameRunning = false;
+            clearInterval(gameLoop);
+            
+            if (score > highScore) {
+                highScore = score;
+                localStorage.setItem('mieleSnakeHighScore', highScore);
+                highScoreElement.textContent = highScore;
+            }
+            
+            finalScoreElement.textContent = score;
+            gameOverOverlay.classList.add('show');
+        }
+        
+        // Keyboard controls
+        document.addEventListener('keydown', (e) => {
+            if (!isGameRunning && e.key !== ' ') return;
+            
+            switch(e.key) {
+                case 'ArrowUp':
+                case 'w':
+                case 'W':
+                    if (direction.y === 0) nextDirection = { x: 0, y: -1 };
+                    break;
+                case 'ArrowDown':
+                case 's':
+                case 'S':
+                    if (direction.y === 0) nextDirection = { x: 0, y: 1 };
+                    break;
+                case 'ArrowLeft':
+                case 'a':
+                case 'A':
+                    if (direction.x === 0) nextDirection = { x: -1, y: 0 };
+                    break;
+                case 'ArrowRight':
+                case 'd':
+                case 'D':
+                    if (direction.x === 0) nextDirection = { x: 1, y: 0 };
+                    break;
+                case ' ':
+                    e.preventDefault();
+                    if (!isGameRunning && gameOverOverlay.classList.contains('show')) {
+                        startGame();
+                    } else {
+                        pauseGame();
+                    }
+                    break;
+            }
+        });
+        
+        // Touch controls for mobile
+        let touchStartX = 0;
+        let touchStartY = 0;
+        
+        canvas.addEventListener('touchstart', (e) => {
+            touchStartX = e.touches[0].clientX;
+            touchStartY = e.touches[0].clientY;
+        }, { passive: true });
+        
+        canvas.addEventListener('touchend', (e) => {
+            if (!isGameRunning) return;
+            
+            const touchEndX = e.changedTouches[0].clientX;
+            const touchEndY = e.changedTouches[0].clientY;
+            
+            const dx = touchEndX - touchStartX;
+            const dy = touchEndY - touchStartY;
+            
+            if (Math.abs(dx) > Math.abs(dy)) {
+                // Horizontal swipe
+                if (dx > 0 && direction.x === 0) nextDirection = { x: 1, y: 0 };
+                else if (dx < 0 && direction.x === 0) nextDirection = { x: -1, y: 0 };
+            } else {
+                // Vertical swipe
+                if (dy > 0 && direction.y === 0) nextDirection = { x: 0, y: 1 };
+                else if (dy < 0 && direction.y === 0) nextDirection = { x: 0, y: -1 };
+            }
+        }, { passive: true });
+        
+        // Initial draw
+        initGame();
+        draw();
+    </script>
+</body>
+</html>

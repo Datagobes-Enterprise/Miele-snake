@@ -1,0 +1,53 @@
+# Deploy Miele Snake to GitHub Pages with Supabase config injected from secrets.
+#
+# Required GitHub secrets (set in repo Settings > Secrets):
+#   SUPABASE_URL       — e.g. https://xxxxx.supabase.co
+#   SUPABASE_ANON_KEY  — the anon/public key from your Supabase project settings
+
+name: Deploy Snake Game
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'miele_snake.html'
+      - '.github/workflows/snake-pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Inject Supabase config
+        env:
+          SB_URL: ${{ secrets.SUPABASE_URL }}
+          SB_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: |
+          sed -i "s|YOUR_SUPABASE_URL|${SB_URL}|g" miele_snake.html
+          sed -i "s|YOUR_SUPABASE_ANON_KEY|${SB_KEY}|g" miele_snake.html
+
+      - name: Prepare Pages artifact
+        run: |
+          mkdir _site
+          cp miele_snake.html _site/index.html
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

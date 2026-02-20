@@ -429,10 +429,26 @@
     </div>
 
     <script>
-        // Supabase config — replace with your project values
-        const SUPABASE_URL = 'YOUR_SUPABASE_URL';
-        const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
-        const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        // Supabase config
+        // Priority: window globals -> localStorage -> placeholders
+        const SUPABASE_URL = window.SUPABASE_URL || localStorage.getItem('mieleSnakeSupabaseUrl') || 'YOUR_SUPABASE_URL';
+        const SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY || localStorage.getItem('mieleSnakeSupabaseAnonKey') || 'YOUR_SUPABASE_ANON_KEY';
+
+        let supabaseClient = null;
+        const hasSupabaseConfig =
+            SUPABASE_URL &&
+            SUPABASE_ANON_KEY &&
+            !SUPABASE_URL.includes('YOUR_SUPABASE_URL') &&
+            !SUPABASE_ANON_KEY.includes('YOUR_SUPABASE_ANON_KEY');
+
+        if (hasSupabaseConfig && window.supabase && typeof window.supabase.createClient === 'function') {
+            try {
+                supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            } catch (err) {
+                console.error('Supabase initialization failed:', err);
+                supabaseClient = null;
+            }
+        }
 
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
@@ -739,6 +755,16 @@
 
         async function fetchLeaderboard() {
             const listEl = document.getElementById('leaderboardList');
+
+            if (!supabaseClient) {
+                listEl.textContent = '';
+                const errDiv = document.createElement('div');
+                errDiv.className = 'leaderboard-empty';
+                errDiv.textContent = 'Leaderboard unavailable (Supabase not configured)';
+                listEl.appendChild(errDiv);
+                return;
+            }
+
             try {
                 const { data, error } = await supabaseClient
                     .from('leaderboard')
@@ -772,6 +798,10 @@
         }
 
         async function submitScore(playerName, playerScore, playerLevel) {
+            if (!supabaseClient) {
+                return false;
+            }
+
             const { data, error } = await supabaseClient
                 .from('leaderboard')
                 .insert([{ player_name: playerName, score: playerScore, level: playerLevel }])

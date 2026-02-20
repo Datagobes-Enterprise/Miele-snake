@@ -20,3 +20,10 @@ localStorage.setItem('mieleSnakeSupabaseUrl', 'https://YOUR_PROJECT.supabase.co'
 localStorage.setItem('mieleSnakeSupabaseAnonKey', 'YOUR_ANON_KEY');
 location.reload();
 ```
+
+### GitHub Pages deploy note
+
+GitHub secret updates do **not** trigger a Pages deploy by themselves.
+After changing `SUPABASE_URL` or `SUPABASE_ANON_KEY`, run the workflow manually (`Actions` → `Deploy Snake Game` → `Run workflow`) or push a commit touching `index.html`.
+
+The deploy workflow now fails fast if Supabase secrets are missing/invalid, instead of publishing a broken build.

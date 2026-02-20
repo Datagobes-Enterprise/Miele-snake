@@ -37,8 +37,28 @@ jobs:
           SB_URL: ${{ secrets.SUPABASE_URL }}
           SB_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
         run: |
+          if [ -z "$SB_URL" ]; then
+            echo "::error::Missing SUPABASE_URL secret for github-pages environment"
+            exit 1
+          fi
+
+          if [ -z "$SB_KEY" ]; then
+            echo "::error::Missing SUPABASE_ANON_KEY secret for github-pages environment"
+            exit 1
+          fi
+
+          if [[ "$SB_URL" != https://* ]]; then
+            echo "::error::SUPABASE_URL must start with https://"
+            exit 1
+          fi
+
           sed -i "s|YOUR_SUPABASE_URL|${SB_URL}|g" index.html
           sed -i "s|YOUR_SUPABASE_ANON_KEY|${SB_KEY}|g" index.html
+
+          if grep -q "YOUR_SUPABASE_URL\|YOUR_SUPABASE_ANON_KEY" index.html; then
+            echo "::error::Supabase placeholders were not fully replaced"
+            exit 1
+          fi
 
       - name: Prepare Pages artifact
         run: |

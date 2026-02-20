@@ -434,20 +434,60 @@
         const SUPABASE_URL = window.SUPABASE_URL || localStorage.getItem('mieleSnakeSupabaseUrl') || 'YOUR_SUPABASE_URL';
         const SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY || localStorage.getItem('mieleSnakeSupabaseAnonKey') || 'YOUR_SUPABASE_ANON_KEY';
 
-        let supabaseClient = null;
-        const hasSupabaseConfig =
-            SUPABASE_URL &&
-            SUPABASE_ANON_KEY &&
-            !SUPABASE_URL.includes('YOUR_SUPABASE_URL') &&
-            !SUPABASE_ANON_KEY.includes('YOUR_SUPABASE_ANON_KEY');
+        function diagnoseSupabaseConfig(url, anonKey) {
+            if (!window.supabase || typeof window.supabase.createClient !== 'function') {
+                return 'Supabase SDK failed to load (CDN blocked/offline)';
+            }
 
-        if (hasSupabaseConfig && window.supabase && typeof window.supabase.createClient === 'function') {
+            if (!url || url.includes('YOUR_SUPABASE_URL')) {
+                return 'Missing Supabase URL';
+            }
+
+            try {
+                const parsed = new URL(url);
+                if (parsed.protocol !== 'https:') {
+                    return 'Supabase URL must use https';
+                }
+            } catch (_) {
+                return 'Supabase URL is invalid';
+            }
+
+            if (!anonKey || anonKey.includes('YOUR_SUPABASE_ANON_KEY')) {
+                return 'Missing Supabase anon key';
+            }
+
+            if (anonKey.length < 20) {
+                return 'Supabase anon key looks too short';
+            }
+
+            return null;
+        }
+
+        function formatSupabaseError(err) {
+            if (!err) return 'Unknown error';
+            if (typeof err === 'string') return err;
+
+            const parts = [];
+            if (err.message) parts.push(err.message);
+            if (err.code) parts.push(`code: ${err.code}`);
+            if (err.hint) parts.push(`hint: ${err.hint}`);
+            if (err.status) parts.push(`status: ${err.status}`);
+
+            return parts.length > 0 ? parts.join(' | ') : 'Unknown error';
+        }
+
+        let supabaseClient = null;
+        const supabaseInitIssue = diagnoseSupabaseConfig(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        if (!supabaseInitIssue) {
             try {
                 supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
             } catch (err) {
                 console.error('Supabase initialization failed:', err);
                 supabaseClient = null;
             }
+        } else {
+            console.error('Supabase initialization blocked:', supabaseInitIssue);
         }
 
         const canvas = document.getElementById('gameCanvas');
@@ -760,7 +800,7 @@
                 listEl.textContent = '';
                 const errDiv = document.createElement('div');
                 errDiv.className = 'leaderboard-empty';
-                errDiv.textContent = 'Leaderboard unavailable (Supabase not configured)';
+                errDiv.textContent = `Leaderboard unavailable (${supabaseInitIssue || 'init failed'})`;
                 listEl.appendChild(errDiv);
                 return;
             }
@@ -792,7 +832,7 @@
                 listEl.textContent = '';
                 const errDiv = document.createElement('div');
                 errDiv.className = 'leaderboard-empty';
-                errDiv.textContent = 'Could not load leaderboard';
+                errDiv.textContent = `Could not load leaderboard (${formatSupabaseError(err)})`;
                 listEl.appendChild(errDiv);
             }
         }

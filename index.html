@@ -431,16 +431,18 @@
     <script>
         // Supabase config
         // Priority: window globals -> localStorage -> placeholders
-        const SUPABASE_URL = window.SUPABASE_URL || localStorage.getItem('mieleSnakeSupabaseUrl') || 'YOUR_SUPABASE_URL';
-        const SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY || localStorage.getItem('mieleSnakeSupabaseAnonKey') || 'YOUR_SUPABASE_ANON_KEY';
+        const SUPABASE_URL_PLACEHOLDER = 'YOUR_SUPABASE_URL';
+        const SUPABASE_ANON_KEY_PLACEHOLDER = 'YOUR_SUPABASE_ANON_KEY';
+        const SUPABASE_URL = window.SUPABASE_URL || localStorage.getItem('mieleSnakeSupabaseUrl') || SUPABASE_URL_PLACEHOLDER;
+        const SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY || localStorage.getItem('mieleSnakeSupabaseAnonKey') || SUPABASE_ANON_KEY_PLACEHOLDER;
 
         function diagnoseSupabaseConfig(url, anonKey) {
             if (!window.supabase || typeof window.supabase.createClient !== 'function') {
                 return 'Supabase SDK failed to load (CDN blocked/offline)';
             }
 
-            if (!url || url.includes('YOUR_SUPABASE_URL')) {
-                return 'Missing Supabase URL';
+            if (!url || url.includes(SUPABASE_URL_PLACEHOLDER)) {
+                return 'Missing Supabase URL (placeholder not replaced; check SUPABASE_URL secret)';
             }
 
             try {
@@ -452,8 +454,8 @@
                 return 'Supabase URL is invalid';
             }
 
-            if (!anonKey || anonKey.includes('YOUR_SUPABASE_ANON_KEY')) {
-                return 'Missing Supabase anon key';
+            if (!anonKey || anonKey.includes(SUPABASE_ANON_KEY_PLACEHOLDER)) {
+                return 'Missing Supabase anon key (placeholder not replaced; check SUPABASE_ANON_KEY secret)';
             }
 
             if (anonKey.length < 20) {

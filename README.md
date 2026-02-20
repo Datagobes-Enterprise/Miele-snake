@@ -5,6 +5,8 @@ simple snake game in premium Miele theme
 
 The leaderboard needs valid Supabase credentials.
 
+Note: GitHub secret names are `SUPABASE_URL` and `SUPABASE_ANON_KEY`; `YOUR_SUPABASE_URL` and `YOUR_SUPABASE_ANON_KEY` are template placeholders in `index.html`.
+
 Config is read in this order:
 1. `window.SUPABASE_URL` and `window.SUPABASE_ANON_KEY`
 2. `localStorage` keys: `mieleSnakeSupabaseUrl`, `mieleSnakeSupabaseAnonKey`

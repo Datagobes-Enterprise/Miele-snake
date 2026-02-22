@@ -26,23 +26,31 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Debug secrets
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: |
+          echo "URL length: ${#SUPABASE_URL}"
+          echo "KEY length: ${#SUPABASE_ANON_KEY}"
+          echo "URL value: [${SUPABASE_URL}]"
+          echo "::add-mask::$SUPABASE_URL"
+          echo "::add-mask::$SUPABASE_ANON_KEY"
+
       - name: Inject Supabase config
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
         run: |
-          echo "Supabase URL: $SUPABASE_URL"
-          echo "Supabase Key: ${SUPABASE_ANON_KEY:0:10}..."
+          if [ -z "$SUPABASE_URL" ] || [ "$SUPABASE_URL" = "YOUR_SUPABASE_URL" ]; then
+            echo "::error::Missing or invalid SUPABASE_URL secret (got: '$SUPABASE_URL')"
+            exit 1
+          fi
+          if [ -z "$SUPABASE_ANON_KEY" ] || [ "$SUPABASE_ANON_KEY" = "YOUR_SUPABASE_ANON_KEY" ]; then
+            echo "::error::Missing or invalid SUPABASE_ANON_KEY secret (got: '$SUPABASE_ANON_KEY')"
+            exit 1
+          fi
           
-          if [ -z "$SUPABASE_URL" ]; then
-            echo "::error::SUPABASE_URL secret is empty!"
-            exit 1
-          fi
-          if [ -z "$SUPABASE_ANON_KEY" ]; then
-            echo "::error::SUPABASE_ANON_KEY secret is empty!"
-            exit 1
-          fi
-
           sed -i "s|__SUPABASE_URL__|${SUPABASE_URL}|g" index.html
           sed -i "s|__SUPABASE_ANON_KEY__|${SUPABASE_ANON_KEY}|g" index.html
 

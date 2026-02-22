@@ -26,18 +26,19 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Debug environment
+        run: |
+          echo "SUPABASE_URL: ${{ vars.SUPABASE_URL }}"
+          echo "SUPABASE_KEY: ${{ vars.SUPABASE_KEY }}"
+
       - name: Inject Supabase config
         run: |
-          # Use environment variables (from github-pages environment)
           SUPABASE_URL="${{ vars.SUPABASE_URL }}"
           SUPABASE_KEY="${{ vars.SUPABASE_KEY }}"
           
           if [ -n "$SUPABASE_URL" ] && [ -n "$SUPABASE_KEY" ]; then
             sed -i "s|__SUPABASE_URL__|${SUPABASE_URL}|g" index.html
             sed -i "s|__SUPABASE_KEY__|${SUPABASE_KEY}|g" index.html
-            echo "Injected Supabase config from environment variables"
-          else
-            echo "No Supabase config"
           fi
 
       - name: Prepare Pages artifact

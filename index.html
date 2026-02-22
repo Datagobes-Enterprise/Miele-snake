@@ -431,8 +431,9 @@
     <script>
         // Supabase config
         // Priority: window globals -> localStorage -> placeholders
-        const SUPABASE_URL_PLACEHOLDER = ['YOUR', 'SUPABASE_URL'].join('_');
-        const SUPABASE_ANON_KEY_PLACEHOLDER = ['YOUR', 'SUPABASE_ANON_KEY'].join('_');
+        // Note: Placeholders are replaced by GitHub Actions during deployment
+        const SUPABASE_URL_PLACEHOLDER = 'YOUR_SUPABASE_URL';
+        const SUPABASE_ANON_KEY_PLACEHOLDER = 'YOUR_SUPABASE_ANON_KEY';
         const SUPABASE_URL = window.SUPABASE_URL || localStorage.getItem('mieleSnakeSupabaseUrl') || SUPABASE_URL_PLACEHOLDER;
         const SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY || localStorage.getItem('mieleSnakeSupabaseAnonKey') || SUPABASE_ANON_KEY_PLACEHOLDER;
 

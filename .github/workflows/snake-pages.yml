@@ -7,13 +7,6 @@ on:
       - 'index.html'
       - '.github/workflows/snake-pages.yml'
   workflow_dispatch:
-    inputs:
-      supabase_url:
-        description: 'Supabase URL'
-        required: false
-      supabase_key:
-        description: 'Supabase Anon Key'
-        required: false
 
 permissions:
   contents: read
@@ -34,16 +27,17 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Inject Supabase config
-        env:
-          SUPABASE_URL: ${{ github.event.inputs.supabase_url }}
-          SUPABASE_ANON_KEY: ${{ github.event.inputs.supabase_key }}
         run: |
-          if [ -n "$SUPABASE_URL" ] && [ -n "$SUPABASE_ANON_KEY" ]; then
+          # Use GitHub Variables (not secrets) - works in public repos
+          SUPABASE_URL="${{ vars.SUPABASE_URL }}"
+          SUPABASE_KEY="${{ vars.SUPABASE_KEY }}"
+          
+          if [ -n "$SUPABASE_URL" ] && [ -n "$SUPABASE_KEY" ]; then
             sed -i "s|__SUPABASE_URL__|${SUPABASE_URL}|g" index.html
-            sed -i "s|__SUPABASE_ANON_KEY__|${SUPABASE_ANON_KEY}|g" index.html
-            echo "Injected Supabase config"
+            sed -i "s|__SUPABASE_KEY__|${SUPABASE_KEY}|g" index.html
+            echo "Injected Supabase config from variables"
           else
-            echo "No Supabase config provided - leaderboard will need manual setup"
+            echo "No Supabase config - leaderboard needs manual setup"
           fi
 
       - name: Prepare Pages artifact

@@ -26,15 +26,30 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Debug environment
+      - name: Debug all env vars
         run: |
-          echo "SUPABASE_URL: ${{ vars.SUPABASE_URL }}"
-          echo "SUPABASE_KEY: ${{ vars.SUPABASE_KEY }}"
+          echo "=== All env vars ==="
+          env | grep -i super || echo "No super vars"
+          echo "=== Check vars.SUPABASE_URL ==="
+          echo "${{ vars.SUPABASE_URL }}"
+          echo "=== Check secrets.SUPABASE_URL ==="  
+          echo "${{ secrets.SUPABASE_URL }}"
 
       - name: Inject Supabase config
         run: |
+          # Try repo-level vars
           SUPABASE_URL="${{ vars.SUPABASE_URL }}"
           SUPABASE_KEY="${{ vars.SUPABASE_KEY }}"
+          
+          # Try environment-level vars
+          if [ -z "$SUPABASE_URL" ]; then
+            SUPABASE_URL="${{ github.env.SUPABASE_URL }}"
+          fi
+          if [ -z "$SUPABASE_KEY" ]; then  
+            SUPABASE_KEY="${{ github.env.SUPABASE_KEY }}"
+          fi
+          
+          echo "Final URL: $SUPABASE_URL"
           
           if [ -n "$SUPABASE_URL" ] && [ -n "$SUPABASE_KEY" ]; then
             sed -i "s|__SUPABASE_URL__|${SUPABASE_URL}|g" index.html
